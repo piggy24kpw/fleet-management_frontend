@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 export const create = async (vehicle_manufacturer: Vehicle_Manufacturer) => {
     await vehicle_manufacturerAPI.create(vehicle_manufacturer)
-    revalidatePath("/manufacturers")
+    revalidatePath("/admin/manufacturer")
 }
 
 export const update = async (vehicle_manufacturer: Vehicle_Manufacturer) => {

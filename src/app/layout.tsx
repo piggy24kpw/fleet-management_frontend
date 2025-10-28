@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from '@/providers/ClientSessionProvider'
+import { BrowserRouter } from "react-router";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,9 @@ export default function RootLayout({
       >
         <SessionProvider refetchInterval={50}>
 
-        {children}
+        <BrowserRouter>
+          {children}
+        </BrowserRouter>
         </SessionProvider>
 
       </body>

@@ -18,6 +18,7 @@ import z from "zod"
 import { useShallow } from 'zustand/react/shallow'
 import useVehicleManufacturerDialog from "./store"
 import { create, update } from "./actions"
+import { createManufacturer } from "@/api/auth/client"
 
 
 export default function VehicleManufacturerDialog() {
@@ -47,10 +48,7 @@ export default function VehicleManufacturerDialog() {
         name: values.manufacturer_name,
       })
     } else {
-      await create({
-        ...values,
-        name: values.manufacturer_name ?? "",
-      })
+      await createManufacturer(values.manufacturer_name);
     }
 
     setIsOpen(false)

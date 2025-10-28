@@ -1,7 +1,7 @@
 
 const routes = {
     all: 'manufacturers',
-    create: 'manufacturers',
+    create: '/admin/manufacturers',
     update: 'manufacturers/'
 }
 

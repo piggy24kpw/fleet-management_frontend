@@ -40,7 +40,7 @@ const items = [
   },
   {
     title: "Vehicle Manufacturers",
-    url: "/admin/manufacturers",
+    url: "/admin/vehicle_manufacturer",
     icon: Settings,
   },
 ]

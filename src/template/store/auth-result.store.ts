@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { AuthResult } from "../dto/common"
+import { AxiosError } from "axios"
 
 type AuthStoreType = {
     auth? : AuthResult
@@ -27,3 +28,13 @@ export function userName() {
 
   return auth.username
 }
+
+type ClientErrorStoreType = {
+    error? : AxiosError
+    setError : (error? : AxiosError) => void
+}
+
+export const clientErrorStore = create<ClientErrorStoreType>((set) => ({
+    error : undefined,
+    setError : (e) => set({error : e})
+}))
