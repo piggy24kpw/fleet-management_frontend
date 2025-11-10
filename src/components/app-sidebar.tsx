@@ -1,72 +1,64 @@
-import { Car, CarFront, ChartLine, Route, Settings, UserRound } from "lucide-react"
+"use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+  LayoutDashboard,
+  UserRound,
+  Shield,
+  Car,
+  Route,
+  Wrench,
+  FileText,
+  Factory,
+} from "lucide-react"
+import { title } from "process"
 
-// Menu items.
 const items = [
-  {
-    title: "Dashboard",
-    url: "#",
-    icon: ChartLine,
-  },
-  {
-    title: "Users",
-    url: "/admin/users",
-    icon: UserRound,
-  },
-  {
-    title: "Drivers",
-    url: "/admin/drivers",
-    icon: CarFront,
-  },
-  {
-    title: "Vehicles",
-    url: "/admin/vehicles",
-    icon: Car,
-  },
-  {
-    title: "Routes",
-    url: "/admin/routes",
-    icon: Route,
-  },
-  {
-    title: "Vehicle Manufacturers",
-    url: "/admin/vehicle_manufacturer",
-    icon: Settings,
-  },
+  { title: "Dashboard", url: "/superadmin", icon: LayoutDashboard },
+  { title: "Users", url: "/superadmin/users", icon: UserRound },
+  { title: "Drivers", url: "/superadmin/drivers", icon: Shield },
+  { title: "Vehicles", url: "/superadmin/vehicles", icon: Car },
+  { title: "Vehicle Manufacturer", url: "/superadmin/vehicle_manufacturer", icon: Factory },
+  { title: "Routes", url: "/superadmin/routes", icon: Route },
+  { title: "Maintenance", url: "/superadmin/maintenance", icon: Wrench },
 ]
 
 export function AppSidebar() {
+  const pathname = usePathname()
+
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+    <aside
+      className="w-64 min-h-screen bg-gradient-to-b from-blue-500 to-blue-700 text-white flex flex-col shadow-lg"
+    >
+
+      {/* --- Menu Items --- */}
+      <nav className="flex-1 mt-4 space-y-1">
+        {items.map((item) => {
+          const isActive = pathname === item.url
+          return (
+            <Link
+              key={item.title}
+              href={item.url}
+              className={cn(
+                "flex items-center space-x-3 px-5 py-2.5 mx-3 rounded-xl text-white/90 transition-all duration-200",
+                "hover:bg-blue-600 hover:text-white",
+                isActive &&
+                  "bg-blue-600 text-white shadow-md ring-1 ring-white/10"
+              )}
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="text-sm font-medium">{item.title}</span>
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* --- Footer (optional) --- */}
+      <div className="mt-auto px-6 py-4 text-xs text-blue-100 border-t border-blue-400">
+        © 2025 Fleet Management
+      </div>
+    </aside>
   )
 }

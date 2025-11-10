@@ -2,12 +2,17 @@ import { AxiosError } from "axios"
 import { clientErrorStore } from "../store/auth-result.store"
 
 export interface SignInForm {
+    userId: number
     username: string
-    password: string
+    email: string
+    organization: string
+    secretKey: string
 }
 
 export interface AuthResult {
+  userId: number
   username: string
+  email: string
   role: string
   accessToken: string
   refreshToken: string

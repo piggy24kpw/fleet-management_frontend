@@ -17,7 +17,3 @@ export async function refreshToken(token: string):ApiResponse<AuthResult> {
     return response?.data
 }
 
-export async function createManufacturer(name: string):ApiResponse<ModificationResult<number>> {
-    const response = await securedClient().post('/admin/manufacturer', {name : name}).catch(handleError)
-    return response?.data
-}

@@ -2,10 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import SignIn from "./app/(public)/anonymous/login/page";
-import DriversPage from "./app/(private)/admin/drivers/page";
-import VehicleManufacturerPage from "./app/(private)/admin/vehicle_manufacturer/page";
-import VehiclePage from "./app/(private)/admin/page";
-import AdminLayout from "./app/(private)/admin/_layout";
+import DriversPage from "./app/(private)/superadmin/drivers/page";
+import VehicleManufacturerPage from "./app/(private)/superadmin/vehicle_manufacturer/page";
+import VehiclePage from "./app/(private)/superadmin/page";
+import AdminLayout from "./app/(private)/superadmin/layout";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
