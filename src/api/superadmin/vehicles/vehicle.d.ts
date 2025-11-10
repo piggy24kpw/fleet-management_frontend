@@ -1,16 +1,29 @@
-type Vehicle = {
-    id?: number,
+import { UUID } from "crypto";
+
+type VehicleForm = {
     vinNo: string;
     model: string;
     licenseNo: string;
-    licenseExpiry: string;
+    licenseExpiry: Date;
     year: number;
-    driverIds: number[];
+    driverIds: number[] | null;
     manufacturerId: number;
-    insuranceIds: string[];
-    vehicle_type: string;
-    type: string;
-    ownership_type: string;
-    status: active | inactive | maintenance
+    insuranceIds: UUID[] | null;
+    vehicleType: string;
+    energyType: string;
+    ownershipType: string;
+    organizationIds: number[] | null;
+    status: string;
+    photos: FileList | null;
+}
 
+export interface VehicleListItem {
+    id: number;
+    licenseNo: string;
+    model: string;
+    vehicleType: string;
+    energyType: string;
+    status: string;
+    drivers: string[];
+    organizations: string[];
 }

@@ -14,6 +14,7 @@ export interface AuthResult {
   username: string
   email: string
   role: string
+  organizationId: number
   accessToken: string
   refreshToken: string
 }

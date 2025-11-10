@@ -18,9 +18,14 @@ import z from "zod"
 import { useShallow } from 'zustand/react/shallow'
 import useVehicleManufacturerDialog from "./store"
 import { createVehicleManufacturer, updateVehicleManufacturer } from "@/api/superadmin/vehicle_manufacturer"
+import { authStore } from "@/template/store/auth-result.store"
 
 
 export default function VehicleManufacturerDialog() {
+
+    const auth = authStore((state) => state.auth);
+    const orgId = auth?.organizationId || 0;
+
   const { isOpen, setIsOpen, vehicle_manufacturer } = useVehicleManufacturerDialog(
     useShallow((state) => ({
       isOpen: state.isOpen,
@@ -47,7 +52,7 @@ export default function VehicleManufacturerDialog() {
         name: values.manufacturer_name,
       })
     } else {
-      await createVehicleManufacturer(values.manufacturer_name);
+      await createVehicleManufacturer(values.manufacturer_name, orgId);
     }
 
     setIsOpen(false)

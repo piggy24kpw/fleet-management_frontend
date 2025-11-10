@@ -1,4 +1,4 @@
-{
+src/api/superadmin/vehicles/index.ts{
   "name": "fleet_management_frontend",
   "version": "0.1.0",
   "private": true,
@@ -36,7 +36,7 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "next": "^15.5.5",
+    "next": "^15.5.6",
     "next-auth": "^4.24.11",
     "persist": "^0.2.7",
     "react": "^19.1.0",

@@ -1,3 +1,5 @@
+import { uuid } from "zod"
+
 type Driver = {
     usernameOrEmail: string,
     licenseNumber: string,
@@ -27,4 +29,19 @@ export interface DriverListItem {
   licenseExpiry: string; 
   status: DriverStatus;
   organizationName: string;
+}
+
+export interface DriverIdAndName {
+  id: number;
+  username: string;
+}
+
+export interface OrganizationIdAndName {
+  id: number;
+  name: string;
+}
+
+export interface ManufacturerIdAndName {
+  id: number;
+  name: string;
 }

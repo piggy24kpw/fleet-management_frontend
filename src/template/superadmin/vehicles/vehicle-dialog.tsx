@@ -1,202 +1,167 @@
-'use client'
+'use client';
 
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import z from "zod"
-import { useShallow } from 'zustand/react/shallow'
-import useVehicleDialog from "./store"
-import VehicleListTemplate from "./vehicle-list"
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router";
+import { createVehicle } from "@/api/superadmin/vehicles";
+import { getAllDriversIdAndNames, getAllManufacturers } from "@/api/superadmin/drivers";
+import { getAllInsurancesIdAndNames } from "@/api/superadmin/insurances";
+import useVehicleDialog from "./store";
+import { authStore } from "@/template/store/auth-result.store";
+import { UUID } from "crypto";
 
+export default function VehicleCreateDialog() {
+  const { isOpen, setIsOpen } = useVehicleDialog();
+  const auth = authStore((state) => state.auth);
+  const orgId = auth?.organizationId || 0;
+  const router = useNavigate();
 
-export default function VehicleDialog() {
-  const { isOpen, setIsOpen, vehicle } = useVehicleDialog(
-    useShallow((state) => ({
-      isOpen: state.isOpen,
-      setIsOpen: state.setIsOpen,
-      vehicle: state.vehicle
-    }))
-  )
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [insurances, setInsurances] = useState<any[]>([]);
+  const [manufacturers, setManufacturers] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const vehicleSchema = z.object({
-    vinNo: z.string().min(1, "User ID is required"),
-    model: z.string().optional(),
-    license_number: z.string().optional(),
-    license_expiry: z.string().optional(),
-    year: z.number().optional(),
-    driverIds: z.array(z.string()).optional(),
-    manufacturerId: z.number().optional(),
-    insuranceIds: z.array(z.string()).optional(),
-    vehicle_type: z.string().optional(),
-    type: z.string().optional(),
-    ownership_type: z.string().optional(),
-    status: z.enum(['active', 'inactive', 'maintenance']).optional(),
-  })
+  const vehicleTypes = ['SEDAN','SUV','TRUCK','VAN','BUS','PICKUP','MOTORCYCLE','TRAILER','HEAVY_MACHINERY'];
+  const energyTypes = ['EV','HEV','PHEV','PETROL','DIESEL','CNG','LPG','HYDROGEN'];
+  const ownershipTypes = ['COMPANY_OWNED','LEASED','RENTED','EMPLOYEE_OWNED','GOVERNMENT_OWNED','THIRD_PARTY_OWNED','LOANED','FINANCE_OWNED'];
+  const statusTypes = ['MAINTENANCE','IN_USE','SENT_TO_LOCATION','RETURNING','AVAILABLE'];
 
-  const form = useForm<z.infer<typeof vehicleSchema>>({
-    resolver: zodResolver(vehicleSchema),
-    defaultValues: {
-        vinNo: vehicle?.vinNo ?? "",
-        model: vehicle?.model ?? "",
-        license_number: vehicle?.licenseNo ?? "",
-        license_expiry: vehicle?.licenseExpiry ?? "",
-        year: vehicle?.year ?? new Date().getFullYear(),
-        driverIds: vehicle?.driverIds?.map(String) ?? [],
-        manufacturerId: vehicle?.manufacturerId ?? 0,
-        insuranceIds: vehicle?.insuranceIds?.map(String) ?? [],
-        vehicle_type: vehicle?.vehicle_type ?? "",
-        type: vehicle?.type ?? "",
-        ownership_type: vehicle?.ownership_type ?? "",
-        status: vehicle?.status ?? "active",
-    },
-  })
+  const fetchManufacturers = useCallback(async () => {
+    try {
+      const data = await getAllManufacturers(orgId);
+      setManufacturers(data || []);
+    } catch {
+      setError("Failed to load manufacturers");
+    }
+  }, [orgId]);
 
-  const handleSubmit = async (values: z.infer<typeof vehicleSchema>) => {
-    if (vehicle) {
-      // await updateVehicle({
-      //   ...values,
-      //   vinNo: vehicle.vinNo,
-      //   model: vehicle.model,
-      //   year: vehicle.year,
-      //   driverIds: vehicle.driverIds,
-      //   manufacturerId: vehicle.manufacturerId,
-      //   insuranceIds: vehicle.insuranceIds,
-      //   vehicle_type: vehicle.vehicle_type,
-      //   type: vehicle.type,
-      //   ownership_type: vehicle.ownership_type,     
-      //   licenseNo: values.license_number ?? "",
-      //   licenseExpiry: values.license_expiry ?? "",
-      //   status: values.status ?? "active",
-      // })
-     } 
-     //else {
-  //     await createVehicle({
-  //       ...values,
-  //       vinNo: values.vinNo,
-  //       model: values.model ?? "",
-  //       year: values.year ?? new Date().getFullYear(),
-  //       driverIds: values.driverIds ? values.driverIds.map(Number) : [],
-  //       manufacturerId: values.manufacturerId ?? 0,
-  //       insuranceIds: values.insuranceIds ? values.insuranceIds.map(String) : [],
-  //       vehicle_type: values.vehicle_type ?? "",
-  //       type: values.type ?? "",
-  //       ownership_type: values.ownership_type ?? "",    
-  //       licenseNo: values.license_number ?? "",
-  //       licenseExpiry: values.license_expiry ?? "",
-  //       status: values.status ?? "active",
-  //     })
-  //   }
+  const fetchDrivers = useCallback(async () => {
+    try {
+      const data = await getAllDriversIdAndNames(orgId);
+      setDrivers(data || []);
+    } catch {
+      setError("Failed to load drivers");
+    }
+  }, [orgId]);
 
-  //   setIsOpen(false)
-  //   form.reset()
-   }
+  const fetchInsurances = useCallback(async () => {
+    try {
+      const data = await getAllInsurancesIdAndNames(orgId);
+      setInsurances(data || []);
+    } catch {
+      setError("Failed to load insurances");
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchDrivers();
+      fetchInsurances();
+      fetchManufacturers();
+    }
+  }, [isOpen, fetchDrivers, fetchInsurances, fetchManufacturers]);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+
+    const vehicleData = {
+      vinNo: (form.vinNo as HTMLInputElement).value,
+      model: (form.model as HTMLInputElement).value,
+      licenseNo: (form.licenseNo as HTMLInputElement).value,
+      licenseExpiry: new Date((form.licenseExpiry as HTMLInputElement).value),
+      year: parseInt((form.year as HTMLInputElement).value),
+      driverIds: [(form.driverId as HTMLSelectElement).value ? parseInt((form.driverId as HTMLSelectElement).value) : null].filter(Boolean),
+      manufacturerId: parseInt((form.manufacturerId as HTMLInputElement).value),
+      insuranceIds: [(form.insuranceId as HTMLSelectElement).value as unknown as UUID].filter(Boolean),
+      vehicleType: (form.vehicleType as HTMLSelectElement).value,
+      energyType: (form.energyType as HTMLSelectElement).value,
+      ownershipType: (form.ownershipType as HTMLSelectElement).value,
+      organizationIds: [orgId],
+      status: (form.status as HTMLSelectElement).value,
+      photos: (form.photos as HTMLInputElement).files || null
+    };
+
+    try {
+      const formData = new FormData();
+      formData.append('form', new Blob([JSON.stringify(vehicleData)], { type: 'application/json' }));
+      if (vehicleData.photos) {
+        Array.from(vehicleData.photos).forEach(file => formData.append('files', file));
+      }
+
+      await createVehicle(formData);
+      setIsOpen(false);
+      router('/superadmin/vehicles');
+    } catch {
+      setError("Failed to create vehicle.");
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent
-        className="max-w-md rounded-2xl border shadow-xl bg-white/90 backdrop-blur-lg"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-gray-800">
-            {vehicle ? 'Update Vehicle' : 'Create Vehicle'}
-          </DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-2xl shadow-lg w-full max-w-3xl p-6 overflow-y-auto max-h-[90vh]">
+        <h2 className="text-2xl font-semibold mb-4">Create Vehicle</h2>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
-            <div className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="vinNo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vin Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter Vin Number" {...field} className="focus-visible:ring-2" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        {error && <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{error}</div>}
 
-              <FormField
-                control={form.control}
-                name="model"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vehicle Model</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter Vehicle Model" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="license_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>License Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter License Number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <form className="space-y-4" onSubmit={onSubmit}>
+          {/* Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <input name="vinNo" type="text" placeholder="VIN No" required className="input"/>
+            <input name="model" type="text" placeholder="Model" required className="input"/>
+            <input name="licenseNo" type="text" placeholder="License No" required className="input"/>
+            <input name="licenseExpiry" type="date" required className="input"/>
+            <input name="year" type="number" placeholder="Year" min="1990" max="2099" required className="input"/>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="license_expiry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>License Expiry Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <select name="manufacturerId" className="input">
+              <option value="">Select Manufacturer</option>
+              {manufacturers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="vehicle_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vehicle Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter Vehicle Type" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <select name="driverId" className="input">
+              <option value="">Select Driver</option>
+              {drivers.map(d => <option key={d.id} value={d.id}>{d.username}</option>)}
+            </select>
 
-            <DialogFooter className="pt-4 border-t">
-              <DialogClose asChild>
-                <Button variant="outline" className="w-24">Cancel</Button>
-              </DialogClose>
-              <Button type="submit" className="w-28">
-                {vehicle ? "Update" : "Create"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+            <select name="insuranceId" className="input">
+              <option value="">Select Insurance</option>
+              {insurances.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+            </select>
+
+            <select name="vehicleType" required className="input">
+              <option value="">Vehicle Type</option>
+              {vehicleTypes.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+
+            <select name="energyType" required className="input">
+              <option value="">Energy Type</option>
+              {energyTypes.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+
+            <select name="ownershipType" required className="input">
+              <option value="">Ownership Type</option>
+              {ownershipTypes.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+
+            <select name="status" required className="input">
+              <option value="">Status</option>
+              {statusTypes.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            <input name="photos" type="file" multiple accept="image/*" className="col-span-2 input"/>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" className="btn-gray" onClick={() => setIsOpen(false)}>Cancel</button>
+            <button type="submit" className="btn-blue">Create Vehicle</button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
