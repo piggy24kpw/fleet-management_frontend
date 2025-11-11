@@ -1,4 +1,4 @@
-src/api/superadmin/vehicles/index.ts{
+{
   "name": "fleet_management_frontend",
   "version": "0.1.0",
   "private": true,

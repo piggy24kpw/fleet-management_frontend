@@ -16,13 +16,13 @@ import {
 import { title } from "process"
 
 const items = [
-  { title: "Dashboard", url: "/superadmin", icon: LayoutDashboard },
-  { title: "Users", url: "/superadmin/users", icon: UserRound },
-  { title: "Drivers", url: "/superadmin/drivers", icon: Shield },
-  { title: "Vehicles", url: "/superadmin/vehicles", icon: Car },
-  { title: "Vehicle Manufacturer", url: "/superadmin/vehicle_manufacturer", icon: Factory },
-  { title: "Routes", url: "/superadmin/routes", icon: Route },
-  { title: "Maintenance", url: "/superadmin/maintenance", icon: Wrench },
+  { title: "Dashboard", url: "/orgadmin", icon: LayoutDashboard },
+  { title: "Users", url: "/orgadmin/users", icon: UserRound },
+  { title: "Drivers", url: "/orgadmin/drivers", icon: Shield },
+  { title: "Vehicles", url: "/orgadmin/vehicles", icon: Car },
+  { title: "Vehicle Manufacturer", url: "/orgadmin/vehicle_manufacturer", icon: Factory },
+  { title: "Routes", url: "/orgadmin/routes", icon: Route },
+  { title: "Maintenance", url: "/orgadmin/maintenance", icon: Wrench },
 ]
 
 export function AppSidebar() {

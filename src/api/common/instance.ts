@@ -15,13 +15,13 @@ export function securedClient() {
     const instance = axios.create({
         // baseURL: 'http://10.253.73.214:8080',
        baseURL: 'http://localhost:8080',
-        timeout: 3000
+        timeout: 5000
     })
 
     instance.interceptors.request.use(config => {
         const {auth} = authStore.getState()
     
-        if(auth) {
+        if(auth?.accessToken) {
             config?.headers.set('Authorization', `Bearer ${auth.accessToken}`)
         }
         return config
@@ -34,17 +34,21 @@ export function securedClient() {
         const originalRequest = error.config
         const {auth, setAuth} = authStore.getState()
 
-        if(error.status == 408 && !originalRequest._retry) {
+        if(error.response?.status == 401 && auth?.refreshToken && !originalRequest._retry) {
             originalRequest._retry = true
             
-            // Refresh token
-            const refreshResult = await refreshToken(auth?.refreshToken || '')
-            setAuth(refreshResult)
+            try {
+                const response = await refreshToken(auth.refreshToken)
 
-            // Retry last request
-            instance(originalRequest)
+                setAuth(response)
 
-            return
+                originalRequest.headers['Authorization'] = `Bearer ${response?.accessToken}`
+                return instance(originalRequest)
+            } catch (refreshError) {
+                console.error("Token refresh failed:", refreshError)
+
+                setAuth(undefined)
+            }
         }
 
         return Promise.reject(error)

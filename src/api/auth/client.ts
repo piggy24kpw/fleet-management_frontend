@@ -13,7 +13,8 @@ export async function signInRequest(form : SignInForm):ApiResponse<AuthResult> {
 // }
 
 export async function refreshToken(token: string):ApiResponse<AuthResult> {
-    const response = await anonymousClient().post('/token/refresh', {token : token}).catch(handleError)
+    if (!token) throw Error("Missing refresh token")
+    const response = await anonymousClient().post('/refresh', {token : token}).catch(handleError)
     return response?.data
 }
 
